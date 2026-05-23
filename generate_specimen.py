@@ -20,8 +20,8 @@ def draw_ruler(
             (x + width / 2 - text_w / 2 - 6, y - 8),
             (x + width / 2 + text_w / 2 + 6, y + 8),
         ],
-        fill="#0f1419",
-    )
+        fill="#0f0e06",
+    )  # ef-autumn background
     draw.text((x + width / 2 - text_w / 2, y - 6), label, fill=color_text, font=font)
 
 
@@ -30,122 +30,178 @@ def main():
     orig_path = "~/.local/share/fonts/JetBrainsMono/JetBrainsMonoNerdFont-SemiBold.ttf"
     output_path = os.path.join(repo_dir, "preview.png")
 
-    font_reg_path = os.path.join(repo_dir, "fonts/TypusMono-Regular.ttf")
-    font_sb_path = os.path.join(repo_dir, "fonts/TypusMono-SemiBold.ttf")
-    font_bold_path = os.path.join(repo_dir, "fonts/TypusMono-Bold.ttf")
-    font_light_path = os.path.join(repo_dir, "fonts/TypusMono-Light.ttf")
-    font_thin_path = os.path.join(repo_dir, "fonts/TypusMono-Thin.ttf")
+    font_thin_path = os.path.join(repo_dir, "fonts/TypusMono95-Thin.ttf")
+    font_light_path = os.path.join(repo_dir, "fonts/TypusMono95-Light.ttf")
+    font_reg_path = os.path.join(repo_dir, "fonts/TypusMono95-Regular.ttf")
+    font_sb_path = os.path.join(repo_dir, "fonts/TypusMono95-SemiBold.ttf")
+    font_bold_path = os.path.join(repo_dir, "fonts/TypusMono95-Bold.ttf")
+
+    font_sb_95_path = os.path.join(repo_dir, "fonts/TypusMono95-SemiBold.ttf")
+    font_sb_92_path = os.path.join(repo_dir, "fonts/TypusMono92-SemiBold.ttf")
+    font_sb_90_path = os.path.join(repo_dir, "fonts/TypusMono90-SemiBold.ttf")
 
     title_font = ImageFont.truetype(font_sb_path, 40)
     tagline_font = ImageFont.truetype(font_reg_path, 16)
     section_title_font = ImageFont.truetype(font_sb_path, 18)
-    char_font = ImageFont.truetype(font_reg_path, 20)
+    char_font = ImageFont.truetype(
+        font_sb_path, 20
+    )  # SemiBold for character set preview
+
     code_font_orig = ImageFont.truetype(orig_path, 15)
-    code_font_typus = ImageFont.truetype(font_reg_path, 15)
+    code_font_typus_95 = ImageFont.truetype(font_sb_95_path, 15)
+    code_font_typus_92 = ImageFont.truetype(font_sb_92_path, 15)
+    code_font_typus_90 = ImageFont.truetype(font_sb_90_path, 15)
+
     ruler_font = ImageFont.truetype(font_light_path, 11)
 
-    bg_color = "#0f1419"
-    img = Image.new("RGB", (1000, 750), color=bg_color)
+    bg_color = "#0f0e06"
+    fg_color = "#cfbcba"
+    keyword_color = "#c48702"
+    comment_color = "#cf9f7f"
+    string_color = "#f06a3f"
+    teal_color = "#3dbbb0"
+    blue_accent = "#6fafff"
+    red_accent = "#ef656a"
+    green_accent = "#2fa526"
+    border_color = "#26211d"
+
+    img = Image.new("RGB", (1000, 920), color=bg_color)
     draw = ImageDraw.Draw(img)
 
     # header
-    draw.text((50, 45), "Typus Mono", fill="#ffb454", font=title_font)
+    draw.text((50, 45), "Typus Mono", fill=keyword_color, font=title_font)
     draw.text(
         (50, 95),
-        "A custom spacing-only condensed variant of JetBrains Mono",
-        fill="#a0a0a0",
+        "A custom spacing-only condensed family derived from JetBrains Mono",
+        fill=comment_color,
         font=tagline_font,
     )
-    draw.line([(50, 130), (950, 130)], fill="#243347", width=1)
+    draw.line([(50, 130), (950, 130)], fill=border_color, width=1)
 
     # character set
-    draw.text((50, 155), "/* Character Set */", fill="#5c6773", font=section_title_font)
+    draw.text(
+        (50, 155),
+        "/* Character Set (Typus Mono 95 SemiBold) */",
+        fill=comment_color,
+        font=section_title_font,
+    )
     chars_line1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chars_line2 = "abcdefghijklmnopqrstuvwxyz"
     chars_line3 = "0123456789  !=  ->  ==  <=  >="
     chars_line4 = "!@#$%^&*()_+-=[]{}|;':\",./<>?  (Stripped Ligatures)"
 
-    draw.text((50, 190), chars_line1, fill="#e6e6e6", font=char_font)
-    draw.text((50, 225), chars_line2, fill="#e6e6e6", font=char_font)
-    draw.text((50, 260), chars_line3, fill="#ff7733", font=char_font)
-    draw.text((50, 295), chars_line4, fill="#b3b1ad", font=char_font)
+    draw.text((50, 190), chars_line1, fill=fg_color, font=char_font)
+    draw.text((50, 225), chars_line2, fill=fg_color, font=char_font)
+    draw.text((50, 260), chars_line3, fill=string_color, font=char_font)
+    draw.text((50, 295), chars_line4, fill=fg_color, font=char_font)
 
-    draw.line([(50, 345), (950, 345)], fill="#243347", width=1)
+    draw.line([(50, 345), (950, 345)], fill=border_color, width=1)
 
     # spacing comparision
     draw.text(
         (50, 370),
-        "/* Spacing Comparison (Cell Width Compression) */",
-        fill="#5c6773",
+        "/* Spacing Comparison (Cell Width Compression - SemiBold) */",
+        fill=comment_color,
         font=section_title_font,
     )
 
     code_line = "static int wait_for_socket(int fd, int events, int timeout_ms) {"
 
-    # Original JetBrains Mono
+    # JetBrains Mono
     draw.text(
         (50, 410),
         "// Original JetBrains Mono (SemiBold)",
-        fill="#707a8c",
+        fill=comment_color,
         font=ruler_font,
     )
-    draw.text((50, 430), code_line, fill="#e6e6e6", font=code_font_orig)
+    draw.text((50, 430), code_line, fill=fg_color, font=code_font_orig)
     orig_w = int(draw.textlength(code_line, font=code_font_orig))
     draw_ruler(
         draw,
         50,
         458,
         orig_w,
-        f"{orig_w}px (Original)",
-        color_line="#e28481",
-        color_text="#e28481",
+        f"{orig_w}px (Original JetBrains Mono)",
+        color_line=red_accent,
+        color_text=red_accent,
         font=ruler_font,
     )
 
-    # Typus Mono
+    # Typus Mono 95
     draw.text(
-        (50, 490),
-        "// Typus Mono (Regular - spaced at 95%)",
-        fill="#707a8c",
-        font=ruler_font,
+        (50, 505), "// Typus Mono 95 (SemiBold)", fill=comment_color, font=ruler_font
     )
-    draw.text((50, 510), code_line, fill="#e6e6e6", font=code_font_typus)
-    typus_w = int(draw.textlength(code_line, font=code_font_typus))
+    draw.text((50, 525), code_line, fill=fg_color, font=code_font_typus_95)
+    w_95 = int(draw.textlength(code_line, font=code_font_typus_95))
     draw_ruler(
         draw,
         50,
-        538,
-        typus_w,
-        f"{typus_w}px (95% Spacing)",
-        color_line="#7fd962",
-        color_text="#7fd962",
+        553,
+        w_95,
+        f"{w_95}px (Typus Mono 95)",
+        color_line=green_accent,
+        color_text=green_accent,
         font=ruler_font,
     )
 
-    draw.line([(50, 585), (950, 585)], fill="#243347", width=1)
+    # Typus Mono 92
+    draw.text(
+        (50, 600), "// Typus Mono 92 (SemiBold)", fill=comment_color, font=ruler_font
+    )
+    draw.text((50, 620), code_line, fill=fg_color, font=code_font_typus_92)
+    w_92 = int(draw.textlength(code_line, font=code_font_typus_92))
+    draw_ruler(
+        draw,
+        50,
+        648,
+        w_92,
+        f"{w_92}px (Typus Mono 92)",
+        color_line=teal_color,
+        color_text=teal_color,
+        font=ruler_font,
+    )
+
+    # Typus Mono 90
+    draw.text(
+        (50, 695), "// Typus Mono 90 (SemiBold)", fill=comment_color, font=ruler_font
+    )
+    draw.text((50, 715), code_line, fill=fg_color, font=code_font_typus_90)
+    w_90 = int(draw.textlength(code_line, font=code_font_typus_90))
+    draw_ruler(
+        draw,
+        50,
+        743,
+        w_90,
+        f"{w_90}px (Typus Mono 90)",
+        color_line=blue_accent,
+        color_text=blue_accent,
+        font=ruler_font,
+    )
+
+    draw.line([(50, 785), (950, 785)], fill=border_color, width=1)
 
     # weight showcase
     draw.text(
-        (50, 605),
-        "/* Weights (Compensated for FreeType rendering) */",
-        fill="#5c6773",
+        (50, 805),
+        "/* Typus Mono 95 Weights (Compensated for FreeType) */",
+        fill=comment_color,
         font=section_title_font,
     )
 
     weights_info = [
-        ("Thin", font_thin_path, "#a0a0a0"),
-        ("Light", font_light_path, "#b0b0b0"),
-        ("Regular", font_reg_path, "#c8c8c8"),
-        ("SemiBold", font_sb_path, "#e6e6e6"),
-        ("Bold", font_bold_path, "#ffffff"),
+        ("Thin", font_thin_path, fg_color),
+        ("Light", font_light_path, fg_color),
+        ("Regular", font_reg_path, fg_color),
+        ("SemiBold", font_sb_path, fg_color),
+        ("Bold", font_bold_path, fg_color),
     ]
 
     x_offset = 50
     for w_name, w_path, w_color in weights_info:
         w_font = ImageFont.truetype(w_path, 16)
-        draw.text((x_offset, 640), w_name, fill="#39bae6", font=ruler_font)
+        draw.text((x_offset, 840), w_name, fill=teal_color, font=ruler_font)
         sample_text = "The quick brown fox"
-        draw.text((x_offset, 660), sample_text, fill=w_color, font=w_font)
+        draw.text((x_offset, 860), sample_text, fill=w_color, font=w_font)
         x_offset += 185
 
     img.save(output_path)
