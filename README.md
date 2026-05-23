@@ -1,32 +1,46 @@
 # Typus Mono
 
-**Typus Mono** is a custom-compiled, condensed, and strictly ligature-free programming font family based on **JetBrains Mono Nerd Font**. 
+**Typus Mono** is a custom-compiled, condensed, and strictly ligature-free programming font family derived from **JetBrains Mono Nerd Font**. 
 
-It was designed to bridge the gap between GPU-accelerated terminal emulators (like Ghostty) and classic desktop GUI applications (like Emacs), delivering an exact pixel-perfect match for cell spacing and visual weight.
+It serves as my personal daily driver. I maintain this repository as a central, easily accessible storage for my setups, though others who share my exact aesthetic preferences and layout constraints may find it useful.
+
+![Typus Mono Specimen and Spacing Comparison](preview.png)
 
 ---
 
-## Key Features
+## The Motivation
 
-1. **Pixel-Perfect Spacing (95% Width)**
-   - The horizontal advance metrics (`hmtx`) are scaled down to **95%**, providing a 1:1 match for Ghostty's cell compression (`adjust-cell-width = -1` at `font-size = 12`).
-   
-2. **Spacing-Only Compression (No Outline Distortion)**
-   - Unlike basic scale operations that stretch or squeeze character vectors, Typus Mono leaves glyph geometries **100% untouched**. Letters retain their original shapes, maintaining optimal readability and pixel-perfect rasterization.
+My journey with terminal aesthetics reached its peak with a highly tuned configuration in the Ghostty terminal emulator. By utilizing cell compression (`adjust-cell-width = -1` and `adjust-cell-height = 1` at a size of `12pt`), I achieved a compact, high-information-density monospace grid that felt incredibly crisp to my eyes.
 
-3. **Academic Office Line Height (105% Height)**
-   - Vertical line metrics are scaled to **105%** to supply clean vertical cell padding, matching Ghostty's `adjust-cell-height = 1` and ensuring a relaxed reading rhythm.
+However, when transitioning to GUI-native applications - specifically **GNU Emacs** - I faced a major obstacle. While terminal emulators can dynamically pack cells tighter by shifting rendering coordinates, Emacs GUI relies on the font's native metrics. It has no built-in mechanism for sub-pixel character width compression.
 
-4. **Shifted Weight Mapping**
-   - Emacs GUI (via standard FreeType rasterization) renders fonts slightly thinner than GPU-accelerated terminals. To compensate and achieve exact visual weight parity, the font mappings have been shifted up:
-     - **Typus Mono `Regular`** uses source **`SemiBold`**
-     - **Typus Mono `SemiBold`** uses source **`Bold`**
-     - **Typus Mono `Bold`** uses source **`ExtraBold`**
-     - **Typus Mono `Light`** uses source **`Regular`**
-     - **Typus Mono `Thin`** uses source **`Light`**
+To dissolve this mismatch and bring the exact, beloved Ghostty text layout into Emacs GUI, the modifications had to be baked directly into the font files. Thus, **Typus Mono** was born.
 
-5. **Strictly Ligature-Free**
-   - GSUB substitution features (`calt`, `liga`, `dlig`, `clig`) are disabled directly inside the font tables, ensuring that programming ligatures are disabled globally across all software.
+---
+
+## The Engineering Details
+
+To achieve a pixel-perfect layout duplicate without ruining legibility, the customization relies on two key modifications:
+
+### 1. Spacing-Only Metrics Compression (95% Width)
+A naive approach would simply scale the font coordinates horizontally. However, horizontal scaling distorts the glyph vectors, turning round shapes into ugly ovals and breaking subpixel hints. 
+
+Typus Mono preserves the glyph outlines **100% untouched**. Instead, it scales only the horizontal advance metrics (`hmtx` table) down to **95%**. The characters keep their original, beautifully designed proportions but are packed closer together—exactly mirroring Ghostty's cell width adjustment.
+
+### 2. Shifted Weight Mapping (Compensating for FreeType)
+When comparing GUI Emacs with Ghostty, my eyes immediately noticed a weight discrepancy. GPU-accelerated terminal renderers (such as Ghostty's custom shaders) naturally draw text with slightly more visual weight ("density"). Emacs GUI, using standard FreeType rasterization on Linux, renders the exact same font files noticeably thinner.
+
+To correct this and restore visual parity, the font files were shifted up by weight classes:
+- **Typus Mono `Regular`** is built from original **`SemiBold`**.
+- **Typus Mono `SemiBold`** is built from original **`Bold`**.
+- **Typus Mono `Bold`** is built from original **`ExtraBold`**.
+- **Typus Mono `Light`** is built from original **`Regular`**.
+- **Typus Mono `Thin`** is built from original **`Light`**.
+
+This weight compensation, combined with the metrics scaling, yields a **1:1 pixel-perfect match** between Ghostty and Emacs GUI (measuring exactly **574 pixels for 64 characters** at size 12).
+
+### 3. Strict Ligature Stripping
+Contextual alternates (`calt`), standard ligatures (`liga`), discretionary ligatures (`dlig`), and contextual ligatures (`clig`) are disabled directly inside the OpenType `GSUB` table. This guarantees a clean, distraction-free environment without programming ligatures across all applications.
 
 ---
 
@@ -42,18 +56,14 @@ It was designed to bridge the gap between GPU-accelerated terminal emulators (li
 
 ## Building from Source
 
-To compile Typus Mono yourself (requires Python and `fonttools` installed):
+The repository contains the exact tools used to build this font family. If you have Python and `fonttools` installed, you can re-run the build:
 
 ```bash
-# Clone the repository
-git clone https://github.com/szymonwilczek/typus-fonts.git
-cd typus-fonts
-
-# Build the fonts (searches for source JetBrainsMono Nerd Font files in standard locations)
+# Searches standard paths for source JetBrainsMono Nerd Font files and builds the family
 ./build.sh
 ```
 
-You can pass a custom source font directory path as an argument if yours is in a non-standard location:
+You can pass a custom source directory path if needed:
 ```bash
 ./build.sh /path/to/source/jetbrains-mono-nerd-font/directory
 ```
@@ -62,20 +72,22 @@ You can pass a custom source font directory path as an argument if yours is in a
 
 ## Installation
 
-Copy the compiled files inside the `fonts/` directory to your local font path:
-
 ```bash
 mkdir -p ~/.local/share/fonts/TypusMono
 cp fonts/*.ttf ~/.local/share/fonts/TypusMono/
 fc-cache -fv
 ```
 
+To load it in Emacs GUI:
+```elisp
+(set-frame-font "Typus Mono-12:weight=normal" nil t)
+```
+
 ---
 
-## License
+## License & Credits
 
-This Font Software is licensed under the **SIL Open Font License, Version 1.1** (OFL). See the [LICENSE](LICENSE) file for the full text.
+Typus Mono is licensed under the **SIL Open Font License, Version 1.1** (OFL). 
 
-**Attribution**: 
-- Based on [JetBrains Mono](https://www.jetbrains.com/lp/mono/) (Copyright (c) 2020, JetBrains).
+- Derived from [JetBrains Mono](https://www.jetbrains.com/lp/mono/) (Copyright (c) 2020, JetBrains).
 - Nerd Font glyphs integrated from [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts).
