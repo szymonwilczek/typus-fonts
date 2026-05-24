@@ -68,7 +68,7 @@ def main():
     green_accent = "#2fa526"
     border_color = "#26211d"
 
-    img = Image.new("RGB", (1000, 920), color=bg_color)
+    img = Image.new("RGB", (1000, 1050), color=bg_color)
     draw = ImageDraw.Draw(img)
 
     # header
@@ -200,13 +200,15 @@ def main():
         ("Bold", font_bold_path, fg_color),
     ]
 
-    x_offset = 50
+    y_offset = 840
     for w_name, w_path, w_color in weights_info:
         w_font = ImageFont.truetype(w_path, 16)
-        draw.text((x_offset, 840), w_name, fill=teal_color, font=ruler_font)
-        sample_text = "The quick brown fox"
-        draw.text((x_offset, 860), sample_text, fill=w_color, font=w_font)
-        x_offset += 153
+        # weight name on the left
+        draw.text((50, y_offset), w_name, fill=teal_color, font=ruler_font)
+        # pangram on the right
+        sample_text = "The quick brown fox jumps over the lazy dog."
+        draw.text((200, y_offset - 3), sample_text, fill=w_color, font=w_font)
+        y_offset += 32
 
     img.save(output_path)
     print("Preview generated successfully!")
