@@ -40,11 +40,11 @@ Contextual alternates (`calt`), standard ligatures (`liga`), discretionary ligat
 
 ## Included Styles
 
-Each scaling factor (90, 92, and 95) has its own independent family containing 10 styles:
+Each scaling factor (90, 92, and 95) has its own independent family containing 12 styles:
 
-- **Typus Mono 90**: `TypusMono90-Thin.ttf`, `TypusMono90-ThinItalic.ttf`, `TypusMono90-Light.ttf`, `TypusMono90-LightItalic.ttf`, `TypusMono90-Regular.ttf`, `TypusMono90-Italic.ttf`, `TypusMono90-SemiBold.ttf`, `TypusMono90-SemiBoldItalic.ttf`, `TypusMono90-Bold.ttf`, `TypusMono90-BoldItalic.ttf`
-- **Typus Mono 92**: `TypusMono92-Thin.ttf`, `TypusMono92-ThinItalic.ttf`, `TypusMono92-Light.ttf`, `TypusMono92-LightItalic.ttf`, `TypusMono92-Regular.ttf`, `TypusMono92-Italic.ttf`, `TypusMono92-SemiBold.ttf`, `TypusMono92-SemiBoldItalic.ttf`, `TypusMono92-Bold.ttf`, `TypusMono92-BoldItalic.ttf`
-- **Typus Mono 95**: `TypusMono95-Thin.ttf`, `TypusMono95-ThinItalic.ttf`, `TypusMono95-Light.ttf`, `TypusMono95-LightItalic.ttf`, `TypusMono95-Regular.ttf`, `TypusMono95-Italic.ttf`, `TypusMono95-SemiBold.ttf`, `TypusMono95-SemiBoldItalic.ttf`, `TypusMono95-Bold.ttf`, `TypusMono95-BoldItalic.ttf`
+- **Typus Mono 90**: `TypusMono90-Thin.ttf`, `TypusMono90-ThinItalic.ttf`, `TypusMono90-Light.ttf`, `TypusMono90-LightItalic.ttf`, `TypusMono90-Regular.ttf`, `TypusMono90-Italic.ttf`, `TypusMono90-SemiBold.ttf`, `TypusMono90-SemiBoldItalic.ttf`, `TypusMono90-Demibold.ttf`, `TypusMono90-DemiboldItalic.ttf`, `TypusMono90-Bold.ttf`, `TypusMono90-BoldItalic.ttf`
+- **Typus Mono 92**: `TypusMono92-Thin.ttf`, `TypusMono92-ThinItalic.ttf`, `TypusMono92-Light.ttf`, `TypusMono92-LightItalic.ttf`, `TypusMono92-Regular.ttf`, `TypusMono92-Italic.ttf`, `TypusMono92-SemiBold.ttf`, `TypusMono92-SemiBoldItalic.ttf`, `TypusMono92-Demibold.ttf`, `TypusMono92-DemiboldItalic.ttf`, `TypusMono92-Bold.ttf`, `TypusMono92-BoldItalic.ttf`
+- **Typus Mono 95**: `TypusMono95-Thin.ttf`, `TypusMono95-ThinItalic.ttf`, `TypusMono95-Light.ttf`, `TypusMono95-LightItalic.ttf`, `TypusMono95-Regular.ttf`, `TypusMono95-Italic.ttf`, `TypusMono95-SemiBold.ttf`, `TypusMono95-SemiBoldItalic.ttf`, `TypusMono95-Demibold.ttf`, `TypusMono95-DemiboldItalic.ttf`, `TypusMono95-Bold.ttf`, `TypusMono95-BoldItalic.ttf`
 
 ## Building from Source
 

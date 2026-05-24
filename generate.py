@@ -116,11 +116,114 @@ def strip_ligatures(font):
                     feature.LookupListIndex = []
 
 
+def interpolate_fonts(font1, font2, factor=0.5):
+    print(f"Interpolating outlines and metrics with factor {factor}...")
+    # interpolate glyf coordinate points
+    if "glyf" in font1 and "glyf" in font2:
+        glyf1 = font1["glyf"]
+        glyf2 = font2["glyf"]
+        for glyph_name in font1.getGlyphOrder():
+            if glyph_name in glyf2:
+                g1 = glyf1[glyph_name]
+                g2 = glyf2[glyph_name]
+
+                # bounding boxes
+                if (
+                    hasattr(g1, "xMin")
+                    and hasattr(g2, "xMin")
+                    and g1.xMin is not None
+                    and g2.xMin is not None
+                ):
+                    g1.xMin = int(round(g1.xMin * (1 - factor) + g2.xMin * factor))
+                    g1.xMax = int(round(g1.xMax * (1 - factor) + g2.xMax * factor))
+                    g1.yMin = int(round(g1.yMin * (1 - factor) + g2.yMin * factor))
+                    g1.yMax = int(round(g1.yMax * (1 - factor) + g2.yMax * factor))
+
+                # simple glyph coordinates
+                if g1.numberOfContours > 0 and g2.numberOfContours > 0:
+                    if (
+                        hasattr(g1, "coordinates")
+                        and hasattr(g2, "coordinates")
+                        and g1.coordinates
+                        and g2.coordinates
+                    ):
+                        c1 = g1.coordinates
+                        c2 = g2.coordinates
+                        if len(c1) == len(c2):
+                            for i in range(len(c1)):
+                                x = c1[i][0] * (1 - factor) + c2[i][0] * factor
+                                y = c1[i][1] * (1 - factor) + c2[i][1] * factor
+                                c1[i] = (x, y)
+
+                # composite glyph offsets
+                elif g1.numberOfContours < 0 and g2.numberOfContours < 0:
+                    if hasattr(g1, "components") and hasattr(g2, "components"):
+                        for comp1, comp2 in zip(g1.components, g2.components):
+                            comp1.x = int(
+                                round(comp1.x * (1 - factor) + comp2.x * factor)
+                            )
+                            comp1.y = int(
+                                round(comp1.y * (1 - factor) + comp2.y * factor)
+                            )
+
+    # interpolate hmtx advance widths & LSBs
+    if "hmtx" in font1 and "hmtx" in font2:
+        hmtx1 = font1["hmtx"]
+        hmtx2 = font2["hmtx"]
+        for glyph_name in hmtx1.metrics.keys():
+            if glyph_name in hmtx2.metrics:
+                w1, lsb1 = hmtx1[glyph_name]
+                w2, lsb2 = hmtx2[glyph_name]
+                hmtx1[glyph_name] = (
+                    int(round(w1 * (1 - factor) + w2 * factor)),
+                    int(round(lsb1 * (1 - factor) + lsb2 * factor)),
+                )
+    return font1
+
+
+def set_weight_class(font, style_name):
+    if "OS/2" in font:
+        os2 = font["OS/2"]
+        style_lower = style_name.lower()
+        print(f"Setting OS/2 usWeightClass for style '{style_name}'...")
+        if "thin" in style_lower:
+            os2.usWeightClass = 100
+        elif "extralight" in style_lower or "extra light" in style_lower:
+            os2.usWeightClass = 200
+        elif "light" in style_lower:
+            os2.usWeightClass = 300
+        elif (
+            "demibold" in style_lower
+            or "demi bold" in style_lower
+            or "demi" in style_lower
+        ):
+            os2.usWeightClass = 650
+        elif "semibold" in style_lower or "semi bold" in style_lower:
+            os2.usWeightClass = 600
+        elif "bold" in style_lower:
+            os2.usWeightClass = 700
+        elif "extrabold" in style_lower or "extra bold" in style_lower:
+            os2.usWeightClass = 800
+        elif "black" in style_lower or "heavy" in style_lower:
+            os2.usWeightClass = 900
+        else:
+            os2.usWeightClass = 400  # Regular
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Create a custom condensed, ligature-free font."
     )
     parser.add_argument("--input", required=True, help="Path to input TTF font file")
+    parser.add_argument(
+        "--input2", help="Optional second input TTF font file for weight interpolation"
+    )
+    parser.add_argument(
+        "--factor",
+        type=float,
+        default=0.5,
+        help="Interpolation factor between input and input2 (0.0 to 1.0, default 0.5)",
+    )
     parser.add_argument(
         "--output", required=True, help="Path to save output TTF font file"
     )
@@ -156,10 +259,21 @@ def main():
         print(f"Error: Input file '{args.input}' not found.")
         sys.exit(1)
 
-    print(f"Loading font: {args.input}")
-    font = TTFont(args.input)
+    if args.input2:
+        if not os.path.exists(args.input2):
+            print(f"Error: Second input file '{args.input2}' not found.")
+            sys.exit(1)
+        print(f"Loading first font: {args.input}")
+        font1 = TTFont(args.input)
+        print(f"Loading second font: {args.input2}")
+        font2 = TTFont(args.input2)
+        font = interpolate_fonts(font1, font2, args.factor)
+    else:
+        print(f"Loading font: {args.input}")
+        font = TTFont(args.input)
 
     rename_font(font, args.name, args.style)
+    set_weight_class(font, args.style)
     scale_horizontal_metrics(font, args.width_scale, args.no_scale_outlines)
     adjust_vertical_metrics(font, args.height_scale)
 

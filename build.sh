@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-FONT_DIR="${1:-~/.local/share/fonts/JetBrainsMono}"
+FONT_DIR="${1:-/home/wolfie/.local/share/fonts/JetBrainsMono}"
 OUTPUT_DIR="fonts"
 GEN_SCRIPT="generate.py"
 
@@ -35,23 +35,35 @@ for scale in 90 92 95; do
 
   echo "=== Generating Typus Mono $scale (Width scale: $width_scale, Height scale: 1.05) ==="
 
-  for style_name in "Thin" "ThinItalic" "Light" "LightItalic" "Regular" "Italic" "SemiBold" "SemiBoldItalic" "Bold" "BoldItalic"; do
-    input_file="${styles[$style_name]}"
+  for style_name in "Thin" "ThinItalic" "Light" "LightItalic" "Regular" "Italic" "SemiBold" "SemiBoldItalic" "Demibold" "DemiboldItalic" "Bold" "BoldItalic"; do
     output_file="TypusMono${scale}-${style_name}.ttf"
+    input_file="${styles[$style_name]}"
+    input2_param=""
 
-    if [ "$style_name" = "Regular" ]; then style_param="Regular"; fi
-    if [ "$style_name" = "Italic" ]; then style_param="Italic"; fi
-    if [ "$style_name" = "SemiBold" ]; then style_param="SemiBold"; fi
-    if [ "$style_name" = "SemiBoldItalic" ]; then style_param="SemiBold Italic"; fi
-    if [ "$style_name" = "Bold" ]; then style_param="Bold"; fi
-    if [ "$style_name" = "BoldItalic" ]; then style_param="Bold Italic"; fi
-    if [ "$style_name" = "Thin" ]; then style_param="Thin"; fi
-    if [ "$style_name" = "ThinItalic" ]; then style_param="Thin Italic"; fi
-    if [ "$style_name" = "Light" ]; then style_param="Light"; fi
-    if [ "$style_name" = "LightItalic" ]; then style_param="Light Italic"; fi
+    if [ "$style_name" = "Demibold" ]; then
+      input_file="JetBrainsMonoNerdFont-Bold.ttf"
+      input2_param="--input2 $FONT_DIR/JetBrainsMonoNerdFont-ExtraBold.ttf"
+      style_param="DemiBold"
+    elif [ "$style_name" = "DemiboldItalic" ]; then
+      input_file="JetBrainsMonoNerdFont-BoldItalic.ttf"
+      input2_param="--input2 $FONT_DIR/JetBrainsMonoNerdFont-ExtraBoldItalic.ttf"
+      style_param="DemiBold Italic"
+    else
+      if [ "$style_name" = "Regular" ]; then style_param="Regular"; fi
+      if [ "$style_name" = "Italic" ]; then style_param="Italic"; fi
+      if [ "$style_name" = "SemiBold" ]; then style_param="SemiBold"; fi
+      if [ "$style_name" = "SemiBoldItalic" ]; then style_param="SemiBold Italic"; fi
+      if [ "$style_name" = "Bold" ]; then style_param="Bold"; fi
+      if [ "$style_name" = "BoldItalic" ]; then style_param="Bold Italic"; fi
+      if [ "$style_name" = "Thin" ]; then style_param="Thin"; fi
+      if [ "$style_name" = "ThinItalic" ]; then style_param="Thin Italic"; fi
+      if [ "$style_name" = "Light" ]; then style_param="Light"; fi
+      if [ "$style_name" = "LightItalic" ]; then style_param="Light Italic"; fi
+    fi
 
     python3 "$GEN_SCRIPT" \
       --input "$FONT_DIR/$input_file" \
+      $input2_param \
       --output "$OUTPUT_DIR/$output_file" \
       --name "Typus Mono $scale" \
       --style "$style_param" \

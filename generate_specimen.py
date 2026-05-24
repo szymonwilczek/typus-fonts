@@ -26,14 +26,17 @@ def draw_ruler(
 
 
 def main():
-    repo_dir = "~/Dokumenty/GitHub/typus-fonts"
-    orig_path = "~/.local/share/fonts/JetBrainsMono/JetBrainsMonoNerdFont-SemiBold.ttf"
+    repo_dir = os.path.expanduser("~/Dokumenty/GitHub/typus-fonts")
+    orig_path = os.path.expanduser(
+        "~/.local/share/fonts/JetBrainsMono/JetBrainsMonoNerdFont-SemiBold.ttf"
+    )
     output_path = os.path.join(repo_dir, "preview.png")
 
     font_thin_path = os.path.join(repo_dir, "fonts/TypusMono95-Thin.ttf")
     font_light_path = os.path.join(repo_dir, "fonts/TypusMono95-Light.ttf")
     font_reg_path = os.path.join(repo_dir, "fonts/TypusMono95-Regular.ttf")
     font_sb_path = os.path.join(repo_dir, "fonts/TypusMono95-SemiBold.ttf")
+    font_db_path = os.path.join(repo_dir, "fonts/TypusMono95-Demibold.ttf")
     font_bold_path = os.path.join(repo_dir, "fonts/TypusMono95-Bold.ttf")
 
     font_sb_95_path = os.path.join(repo_dir, "fonts/TypusMono95-SemiBold.ttf")
@@ -193,6 +196,7 @@ def main():
         ("Light", font_light_path, fg_color),
         ("Regular", font_reg_path, fg_color),
         ("SemiBold", font_sb_path, fg_color),
+        ("DemiBold", font_db_path, fg_color),
         ("Bold", font_bold_path, fg_color),
     ]
 
@@ -202,7 +206,7 @@ def main():
         draw.text((x_offset, 840), w_name, fill=teal_color, font=ruler_font)
         sample_text = "The quick brown fox"
         draw.text((x_offset, 860), sample_text, fill=w_color, font=w_font)
-        x_offset += 185
+        x_offset += 153
 
     img.save(output_path)
     print("Preview generated successfully!")
