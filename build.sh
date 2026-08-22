@@ -68,8 +68,7 @@ for scale in 90 92 95; do
       --name "Typus Mono $scale" \
       --style "$style_param" \
       --width-scale "$width_scale" \
-      --height-scale 1.05 \
-      --no-scale-outlines
+      --height-scale 1.00
   done
 done
 

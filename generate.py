@@ -56,32 +56,36 @@ def scale_horizontal_metrics(font, width_scale, no_scale_outlines=False):
         for glyph_name in font.getGlyphOrder():
             glyph = glyf_table[glyph_name]
 
-            # scale bounding box limits directly
-            if hasattr(glyph, "xMin") and glyph.xMin is not None:
-                glyph.xMin = int(round(glyph.xMin * width_scale))
-            if hasattr(glyph, "xMax") and glyph.xMax is not None:
-                glyph.xMax = int(round(glyph.xMax * width_scale))
-
             if glyph.numberOfContours > 0:
                 # simple glyph: scale coordinates in-place
                 if hasattr(glyph, "coordinates") and glyph.coordinates:
                     glyph.coordinates.scale((width_scale, 1.0))
+                glyph.recalcBounds(glyf_table)
             elif glyph.numberOfContours < 0:
                 # composite glyph: scale component x offsets
                 if hasattr(glyph, "components"):
                     for component in glyph.components:
                         component.x = int(round(component.x * width_scale))
+                glyph.recalcBounds(glyf_table)
 
     # scale advance width and left side bearing in the hmtx table
     # NOTE: this must always be scaled to ensure character spacing matches the grid
     if "hmtx" in font:
         hmtx = font["hmtx"]
+        glyf_table = font.get("glyf")
         for glyph_name in hmtx.metrics.keys():
             width, lsb = hmtx[glyph_name]
-            hmtx[glyph_name] = (
-                int(round(width * width_scale)),
-                int(round(lsb * width_scale)),
-            )
+            new_width = int(round(width * width_scale))
+            if (
+                glyf_table
+                and glyph_name in glyf_table
+                and hasattr(glyf_table[glyph_name], "xMin")
+                and glyf_table[glyph_name].xMin is not None
+            ):
+                new_lsb = glyf_table[glyph_name].xMin
+            else:
+                new_lsb = int(round(lsb * width_scale))
+            hmtx[glyph_name] = (new_width, new_lsb)
 
 
 def adjust_vertical_metrics(font, height_scale):
