@@ -75,7 +75,7 @@ def main():
     draw.text((50, 45), "Typus Mono", fill=keyword_color, font=title_font)
     draw.text(
         (50, 95),
-        "A custom spacing-only condensed family derived from JetBrains Mono",
+        "A custom condensed, ligature-free monospace family tailored for GNU Emacs",
         fill=comment_color,
         font=tagline_font,
     )

@@ -18,10 +18,10 @@ To dissolve this mismatch and bring the exact, beloved Ghostty text layout into 
 
 To achieve a pixel-perfect layout duplicate without ruining legibility, the customization relies on two key modifications:
 
-### 1. Spacing-Only Metrics Compression (90%, 92%, and 95% Widths)
-A naive approach would simply scale the font coordinates horizontally. However, horizontal scaling distorts the glyph vectors, turning round shapes into ugly ovals and breaking subpixel hints.
+### 1. Proportional Outline & Metrics Compression (90%, 92%, and 95% Widths)
+To faithfully mirror Ghostty's cell compression (`adjust-cell-width = -1`), I've proportionally scaled glyph outlines and advance metrics down to **90%**, **92%**, or **95%**.
 
-Typus Mono preserves the glyph outlines **100% untouched**. Instead, it scales only the horizontal advance metrics (`hmtx` table) down to **90%**, **92%**, or **95%**. The characters keep their original, beautifully designed proportions but are packed closer together - exactly mirroring Ghostty's cell width adjustment.
+Each glyph's bounding box and sidebearings (`LSB` and `RSB`) are dynamically recalculated and centered, guaranteeing perfectly balanced letter margins and zero optical distortion across all font sizes.
 
 ### 2. Shifted Weight Mapping (Compensating for FreeType)
 When comparing GUI Emacs with Ghostty, my eyes immediately noticed a weight discrepancy. GPU-accelerated terminal renderers (such as Ghostty's custom shaders) naturally draw text with slightly more visual weight ("density"). Emacs GUI, using standard FreeType rasterization on Linux, renders the exact same font files noticeably thinner.
