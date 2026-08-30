@@ -4,7 +4,10 @@
 
 It serves as my personal daily driver. I maintain this repository as a central, easily accessible storage for my setups, though others who share my exact aesthetic preferences and layout constraints may find it useful.
 
-![Typus Mono Specimen and Spacing Comparison](preview.png)
+<p align="center">
+  <img src="preview.png" alt="Typus Mono Specimen and Spacing Comparison" width="49.5%">
+  <img src="grid_specimen.png" alt="Typus Mono Glyph Anatomy Grid" width="49.5%">
+</p>
 
 ## Motivation
 
