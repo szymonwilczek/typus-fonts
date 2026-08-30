@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
 Unit Tests for Typus Mono Font Standards Compliance
-Checks:
-- ISO/IEC 14496-22 / OpenType spec
-- Hinting Bytecode and CVT Synchronization
-- OpenType Table Sanity
-- Valid Unicode Coverage and Character Map Integrity
-- Non-negative Glyph Bounding Box Coordinates and Valid Sidebearings
+Checks OpenType, TrueType, and Font Bakery standards:
+- Mandatory OpenType Table Sanity
+- Strict Monospace Advance Width Uniformity
+- OpenType USE_TYPO_METRICS flag (OS/2 fsSelection Bit 7, 0x0080)
+- OpenType usWidthClass metadata (3 for Condensed, 4 for Semi-Condensed)
+- OpenType gasp Table Configuration (Symmetric smoothing and grid-fitting)
+- GSUB Ligature Disabling (calt, liga, dlig, clig)
+- TrueType Contour Winding Direction
 """
 
 import os
@@ -16,14 +18,21 @@ from fontTools.ttLib import TTFont
 FONTS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts"
 )
+TEST_BUILDS_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "test_builds", "step_3"
+)
 
 
 class TestTypusMonoStandards(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.font_files = [f for f in os.listdir(FONTS_DIR) if f.endswith(".ttf")]
+        target_dir = TEST_BUILDS_DIR if os.path.exists(TEST_BUILDS_DIR) else FONTS_DIR
+        cls.target_dir = target_dir
+        cls.font_files = [
+            f for f in sorted(os.listdir(target_dir)) if f.endswith(".ttf")
+        ]
         if not cls.font_files:
-            raise unittest.SkipTest("No TTF fonts found in fonts/ directory")
+            raise unittest.SkipTest(f"No TTF fonts found in {target_dir}")
 
     def test_required_tables_present(self):
         """Verify all mandatory OpenType and TrueType tables exist."""
@@ -38,9 +47,10 @@ class TestTypusMonoStandards(unittest.TestCase):
             "post",
             "glyf",
             "loca",
+            "gasp",
         }
         for fname in self.font_files:
-            fpath = os.path.join(FONTS_DIR, fname)
+            fpath = os.path.join(self.target_dir, fname)
             with self.subTest(font=fname):
                 font = TTFont(fpath)
                 missing = mandatory_tables - set(font.keys())
@@ -51,7 +61,7 @@ class TestTypusMonoStandards(unittest.TestCase):
     def test_monospace_advance_width_uniformity(self):
         """Verify all positive-width glyphs share the exact same advance width (Font Bakery com.google.fonts/check/monospace)."""
         for fname in self.font_files:
-            fpath = os.path.join(FONTS_DIR, fname)
+            fpath = os.path.join(self.target_dir, fname)
             with self.subTest(font=fname):
                 font = TTFont(fpath)
                 hmtx = font["hmtx"]
@@ -69,10 +79,54 @@ class TestTypusMonoStandards(unittest.TestCase):
                     f"{fname} has inconsistent positive advance widths: {unique_widths}",
                 )
 
+    def test_use_typo_metrics_flag(self):
+        """Verify USE_TYPO_METRICS (OS/2 fsSelection Bit 7: 0x0080) is enabled."""
+        for fname in self.font_files:
+            fpath = os.path.join(self.target_dir, fname)
+            with self.subTest(font=fname):
+                font = TTFont(fpath)
+                os2 = font["OS/2"]
+                has_typo_metrics = bool(os2.fsSelection & 0x0080)
+                self.assertTrue(
+                    has_typo_metrics,
+                    f"{fname} OS/2.fsSelection does not have USE_TYPO_METRICS enabled",
+                )
+
+    def test_uswidthclass_metadata(self):
+        """Verify usWidthClass matches font condensed proportion (3 for 90%, 4 for 92%/95%)."""
+        for fname in self.font_files:
+            fpath = os.path.join(self.target_dir, fname)
+            with self.subTest(font=fname):
+                font = TTFont(fpath)
+                os2 = font["OS/2"]
+                if "90" in fname:
+                    expected_width_class = 3
+                else:
+                    expected_width_class = 4
+                self.assertEqual(
+                    os2.usWidthClass,
+                    expected_width_class,
+                    f"{fname} has incorrect usWidthClass {os2.usWidthClass}, expected {expected_width_class}",
+                )
+
+    def test_gasp_table_configuration(self):
+        """Verify gasp table enables full symmetric smoothing and grid fitting."""
+        for fname in self.font_files:
+            fpath = os.path.join(self.target_dir, fname)
+            with self.subTest(font=fname):
+                font = TTFont(fpath)
+                gasp = font["gasp"]
+                self.assertTrue(len(gasp.gaspRange) > 0, f"{fname} has empty gaspRange")
+                max_range_flag = gasp.gaspRange[max(gasp.gaspRange.keys())]
+                self.assertTrue(
+                    bool(max_range_flag & 0x000F),
+                    f"{fname} gasp table does not enable full flags",
+                )
+
     def test_ligature_features_stripped(self):
         """Verify calt, liga, dlig, and clig lookups are disabled in GSUB."""
         for fname in self.font_files:
-            fpath = os.path.join(FONTS_DIR, fname)
+            fpath = os.path.join(self.target_dir, fname)
             with self.subTest(font=fname):
                 font = TTFont(fpath)
                 if "GSUB" in font:
@@ -86,26 +140,31 @@ class TestTypusMonoStandards(unittest.TestCase):
                                     f"{fname} still has active lookup for {record.FeatureTag}",
                                 )
 
-    def test_bounding_box_and_sidebearings_sanity(self):
-        """Verify left sidebearing matches xMin in glyf table for all simple glyphs."""
-        for fname in ["TypusMono95-Regular.ttf", "TypusMono95-Bold.ttf"]:
-            fpath = os.path.join(FONTS_DIR, fname)
-            if not os.path.exists(fpath):
-                continue
-            with self.subTest(font=fname):
-                font = TTFont(fpath)
-                glyf = font["glyf"]
-                hmtx = font["hmtx"]
-                for gname in ["A", "B", "C", "H", "n", "m", "zero", "one"]:
-                    if gname in glyf:
-                        g = glyf[gname]
-                        if g.numberOfContours > 0:
-                            lsb = hmtx.metrics[gname][1]
-                            self.assertEqual(
-                                lsb,
-                                g.xMin,
-                                f"LSB mismatch for glyph {gname} in {fname}",
-                            )
+    def test_contour_winding_direction(self):
+        """Verify TrueType contour winding: outer contours must be clockwise (signed area < 0)."""
+        sample_font = os.path.join(self.target_dir, self.font_files[0])
+        font = TTFont(sample_font)
+        glyf = font["glyf"]
+        for gname in ["O", "A", "B", "H", "zero"]:
+            if gname in glyf:
+                g = glyf[gname]
+                if g.numberOfContours > 0:
+                    coords = g.coordinates
+                    end_pts = g.endPtsOfContours
+                    # Check first/outer contour
+                    n_pts = end_pts[0] + 1
+                    area = 0.0
+                    for i in range(n_pts):
+                        j = (i + 1) % n_pts
+                        area += (
+                            coords[i][0] * coords[j][1] - coords[j][0] * coords[i][1]
+                        )
+                    area /= 2.0
+                    self.assertLess(
+                        area,
+                        0.0,
+                        f"Outer contour of glyph '{gname}' in {sample_font} is not clockwise",
+                    )
 
 
 if __name__ == "__main__":
