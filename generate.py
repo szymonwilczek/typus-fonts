@@ -205,11 +205,13 @@ def interpolate_fonts(font1, font2, factor=0.5):
     return font1
 
 
-def set_weight_class(font, style_name):
+def set_os2_metadata(font, style_name, width_scale):
     if "OS/2" in font:
         os2 = font["OS/2"]
         style_lower = style_name.lower()
-        print(f"Setting OS/2 usWeightClass for style '{style_name}'...")
+        print(
+            f"Setting OS/2 metadata for style '{style_name}' (width scale: {width_scale})..."
+        )
         if "thin" in style_lower:
             os2.usWeightClass = 100
         elif "extralight" in style_lower or "extra light" in style_lower:
@@ -232,6 +234,20 @@ def set_weight_class(font, style_name):
             os2.usWeightClass = 900
         else:
             os2.usWeightClass = 400  # Regular
+
+        # usWidthClass
+        # (OpenType spec: 3=Condensed, 4=Semi-Condensed, 5=Normal)
+        if width_scale <= 0.90:
+            os2.usWidthClass = 3
+        elif width_scale < 1.00:
+            os2.usWidthClass = 4
+        else:
+            os2.usWidthClass = 5
+
+        # USE_TYPO_METRICS
+        # (bit 7 of fsSelection)
+        if hasattr(os2, "fsSelection"):
+            os2.fsSelection |= 0x0080
 
 
 def autohint_font(input_path, output_path):
@@ -331,7 +347,7 @@ def main():
         font = TTFont(args.input)
 
     rename_font(font, args.name, args.style)
-    set_weight_class(font, args.style)
+    set_os2_metadata(font, args.style, args.width_scale)
     scale_horizontal_metrics(font, args.width_scale, args.no_scale_outlines)
     adjust_vertical_metrics(font, args.height_scale)
 
