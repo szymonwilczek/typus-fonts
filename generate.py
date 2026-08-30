@@ -91,9 +91,6 @@ def scale_horizontal_metrics(font, width_scale, no_scale_outlines=False):
             hmtx[glyph_name] = (new_width, new_lsb)
 
 
-
-
-
 def normalize_nerd_font_icons(font):
     """
     Normalize standalone Nerd Font icons so they don't sag below baseline (Y=0)
@@ -314,8 +311,13 @@ def set_os2_metadata(font, style_name, width_scale):
             os2.usWeightClass = 400  # Regular
 
         # usWidthClass
-        # (OpenType spec: 5 = Medium / Normal standard for monospace)
-        os2.usWidthClass = 5
+        # (OpenType spec: 3=Condensed for 90%, 4=Semi-Condensed for 92%/95%, 5=Normal)
+        if width_scale <= 0.90:
+            os2.usWidthClass = 3
+        elif width_scale < 1.00:
+            os2.usWidthClass = 4
+        else:
+            os2.usWidthClass = 5
 
         # USE_TYPO_METRICS
         # (bit 7 of fsSelection)
