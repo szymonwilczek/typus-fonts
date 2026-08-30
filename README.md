@@ -38,6 +38,15 @@ This weight compensation, combined with the metrics scaling, yields a **1:1 pixe
 ### 3. Strict Ligature Stripping
 Contextual alternates (`calt`), standard ligatures (`liga`), discretionary ligatures (`dlig`), and contextual ligatures (`clig`) are disabled directly inside the OpenType `GSUB` table. I don't really like them and this guarantees a clean, distraction-free environment without programming ligatures across all applications.
 
+### 4. Grid-Aligned TrueType Autohinting (`ttfautohint`)
+When scaling font outlines down, stale TrueType bytecode instructions from the original 100% width font can conflict with the scaled geometry. Typus Mono strips out-of-sync bytecode and uses `ttfautohint` with calibrated stem width calculation (`--stem-width-mode=qsq`) to generate fresh hinting instructions aligned with the condensed grid.
+
+### 5. OpenType 1.9 & Typography Standards Compliance
+- **`USE_TYPO_METRICS` (OS/2 `fsSelection` Bit 7)**: Enabled to enforce consistent, pixel-accurate line-height calculations across all operating systems.
+- **`usWidthClass`**: Correctly classified as `3` (Condensed) for the 90 variant and `4` (Semi-Condensed) for the 92 and 95 variants.
+- **`gasp` Table**: Includes full symmetric grayscale smoothing and grid-fitting flags (`0x000F`).
+- **Contour Winding Normalization**: Validated to adhere to the TrueType standard (outer contours clockwise, inner cutouts counter-clockwise).
+
 ## Included Styles
 
 Each scaling factor (90, 92, and 95) has its own independent family containing 12 styles:
@@ -48,7 +57,7 @@ Each scaling factor (90, 92, and 95) has its own independent family containing 1
 
 ## Building from Source
 
-The repository contains the exact tools used to build this font family. If you have Python and `fonttools` installed, you can re-run the build:
+The repository contains the exact tools used to build this font family. Requires Python 3, `fonttools`, and `ttfautohint`:
 
 ```bash
 # Searches standard paths for source JetBrainsMono Nerd Font files and builds all variants
