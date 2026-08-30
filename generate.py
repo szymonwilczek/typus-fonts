@@ -155,10 +155,10 @@ def normalize_nerd_font_icons(font):
 
             new_coords = []
             for x, y in glyph.coordinates:
-                # proportional scaling and baseline anchoring
+                # vertical alignment and scaling
+                # X is already scaled by scale_horizontal_metrics
                 ny = round(target_ymin + (y - y_min) * scale)
-                nx = round(x * scale)
-                new_coords.append((nx, ny))
+                new_coords.append((x, ny))
 
             glyph.coordinates = type(glyph.coordinates)(new_coords)
             glyph.recalcBounds(glyf_table)
