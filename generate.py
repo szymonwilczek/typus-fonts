@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import sys
 
-from fontTools.ttLib import TTFont
+from fontTools.ttLib import TTFont, newTable
 
 
 def rename_font(font, new_family_name, new_style_name):
@@ -250,6 +250,15 @@ def set_os2_metadata(font, style_name, width_scale):
             os2.fsSelection |= 0x0080
 
 
+def configure_gasp_table(font):
+    print("Configuring OpenType gasp table (0x000F: GRIDFIT | DOGRAY | SYMMETRIC)...")
+    if "gasp" not in font:
+        font["gasp"] = newTable("gasp")
+    gasp = font["gasp"]
+    gasp.version = 1
+    gasp.gaspRange = {65535: 0x000F}
+
+
 def autohint_font(input_path, output_path):
     print("Generating optimized TrueType autohinting via ttfautohint...")
     cmd = [
@@ -350,6 +359,7 @@ def main():
     set_os2_metadata(font, args.style, args.width_scale)
     scale_horizontal_metrics(font, args.width_scale, args.no_scale_outlines)
     adjust_vertical_metrics(font, args.height_scale)
+    configure_gasp_table(font)
 
     if not args.no_strip_bytecode:
         strip_stale_bytecode(font)
