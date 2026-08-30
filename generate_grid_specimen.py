@@ -22,41 +22,43 @@ def main():
     img = Image.new("RGB", (W, H), color="#0f0e06")
     draw = ImageDraw.Draw(img)
 
-    header_font = ImageFont.truetype(font_bold_path, 32 * S)
-    sub_font = ImageFont.truetype(font_path, 15 * S)
-    guide_font = ImageFont.truetype(font_path, 12 * S)
+    header_font = ImageFont.truetype(font_bold_path, 40 * S)
+    sub_font = ImageFont.truetype(font_path, 16 * S)
+    guide_font = ImageFont.truetype(font_path, 11 * S)
 
     draw.text(
         (50 * S, 45 * S),
-        "Typus Mono 92 // Glyph Anatomy Grid",
+        "Typus Mono 92",
         fill="#c48702",
         font=header_font,
     )
     draw.text(
         (50 * S, 95 * S),
-        'Close-up monospace cell alignment across "T y p u s M o n o" (Semi-Condensed)',
+        'Close-up monospace cell anatomy across "T y p u s M o n o" (Semi-Condensed)',
         fill="#cf9f7f",
         font=sub_font,
     )
-    draw.line([(50 * S, 130 * S), (950 * S, 130 * S)], fill="#26211d", width=1 * S)
+    draw.line(
+        [(50 * S, 130 * S), (950 * S, 130 * S)], fill="#26211d", width=1 * S
+    )
 
     grid_x0 = 50 * S
     grid_y0 = 160 * S
     grid_w = 900 * S
-    grid_h = 880 * S
+    grid_h = 820 * S
 
     cols, rows = 3, 3
-    gap = 16 * S
+    gap = 14 * S
     cell_w = (grid_w - (cols - 1) * gap) // cols
     cell_h = (grid_h - (rows - 1) * gap) // rows
 
     letters = [["T", "y", "p"], ["u", "s", "M"], ["o", "n", "o"]]
 
-    font_size = 190 * S
+    font_size = 175 * S
     letter_font = ImageFont.truetype(font_path, font_size)
 
     cell_bg = "#14120a"
-    cell_border = "#2c251d"
+    cell_border = "#26211d"
     guide_color = "#383028"
     baseline_guide = "#284d38"
     text_color = "#f5efe0"
@@ -73,16 +75,16 @@ def main():
                 [x0, y0, x1, y1], fill=cell_bg, outline=cell_border, width=1 * S
             )
 
-            baseline_y = y0 + round(cell_h * 0.73)
+            baseline_y = y0 + round(cell_h * 0.74)
             cap_y = baseline_y - round(font_size * 0.70)
 
             draw.line(
-                [(x0 + 8 * S, cap_y), (x1 - 8 * S, cap_y)],
+                [(x0 + 6 * S, cap_y), (x1 - 6 * S, cap_y)],
                 fill=guide_color,
                 width=1 * S,
             )
             draw.line(
-                [(x0 + 8 * S, baseline_y), (x1 - 8 * S, baseline_y)],
+                [(x0 + 6 * S, baseline_y), (x1 - 6 * S, baseline_y)],
                 fill=baseline_guide,
                 width=1 * S,
             )
@@ -99,19 +101,19 @@ def main():
             )
 
             draw.text(
-                (x0 + 12 * S, y0 + 10 * S),
+                (x0 + 10 * S, y0 + 8 * S),
                 f"U+{ord(char):04X}",
                 fill="#c48702",
                 font=guide_font,
             )
             draw.text(
-                (x1 - 65 * S, y0 + 10 * S),
+                (x1 - 60 * S, y0 + 8 * S),
                 "552 UPM",
                 fill="#3dbbb0",
                 font=guide_font,
             )
             draw.text(
-                (x0 + 12 * S, baseline_y + 4 * S),
+                (x0 + 10 * S, baseline_y + 4 * S),
                 "baseline",
                 fill="#3d7350",
                 font=guide_font,
