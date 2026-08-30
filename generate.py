@@ -143,22 +143,25 @@ def normalize_nerd_font_icons(font):
             and glyph.coordinates
         ):
             y_min, y_max = glyph.yMin, glyph.yMax
+            x_min, x_max = glyph.xMin, glyph.xMax
             h = float(y_max - y_min)
+            w = float(x_max - x_min)
             if h <= 0:
                 continue
 
             scale = min(1.0, max_allowed_h / h)
             new_h = h * scale
+            new_w = w * scale
 
             # bottom on baseline Y=0
             target_ymin = 0
+            target_xmin = round(x_min + (w - new_w) / 2.0)
 
             new_coords = []
             for x, y in glyph.coordinates:
-                # vertical alignment and scaling
-                # X is already scaled by scale_horizontal_metrics
+                nx = round(target_xmin + (x - x_min) * scale)
                 ny = round(target_ymin + (y - y_min) * scale)
-                new_coords.append((x, ny))
+                new_coords.append((nx, ny))
 
             glyph.coordinates = type(glyph.coordinates)(new_coords)
             glyph.recalcBounds(glyf_table)
