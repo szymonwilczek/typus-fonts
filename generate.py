@@ -91,6 +91,57 @@ def scale_horizontal_metrics(font, width_scale, no_scale_outlines=False):
             hmtx[glyph_name] = (new_width, new_lsb)
 
 
+def validate_and_fix_contour_winding(font):
+    """
+    Validate and enforce TrueType contour winding direction.
+    Outer contours must be Clockwise (signed area < 0).
+    """
+    if "glyf" not in font:
+        return
+
+    glyf_table = font["glyf"]
+    fixed_count = 0
+
+    for glyph_name in font.getGlyphOrder():
+        glyph = glyf_table[glyph_name]
+        if (
+            glyph.numberOfContours > 0
+            and hasattr(glyph, "coordinates")
+            and glyph.coordinates
+        ):
+            coords = glyph.coordinates
+            flags = glyph.flags
+            end_pts = glyph.endPtsOfContours
+            start_idx = 0
+
+            for c_idx, end_idx in enumerate(end_pts):
+                n_pts = end_idx - start_idx + 1
+                if n_pts >= 3:
+                    c_slice = [coords[i] for i in range(start_idx, end_idx + 1)]
+                    area = 0.0
+                    for i in range(n_pts):
+                        j = (i + 1) % n_pts
+                        area += (
+                            c_slice[i][0] * c_slice[j][1]
+                            - c_slice[j][0] * c_slice[i][1]
+                        )
+                    area /= 2.0
+
+                    if c_idx == 0 and area > 0:
+                        coords[start_idx : end_idx + 1] = list(
+                            reversed(coords[start_idx : end_idx + 1])
+                        )
+                        flags[start_idx : end_idx + 1] = list(
+                            reversed(flags[start_idx : end_idx + 1])
+                        )
+                        fixed_count += 1
+
+                start_idx = end_idx + 1
+
+    if fixed_count > 0:
+        print(f"Corrected contour winding direction for {fixed_count} glyph contours.")
+
+
 def strip_stale_bytecode(font):
     print("Stripping stale TrueType hinting bytecode and tables (cvt, fpgm, prep)...")
     for tbl in ("cvt ", "fpgm", "prep"):
@@ -358,6 +409,7 @@ def main():
     rename_font(font, args.name, args.style)
     set_os2_metadata(font, args.style, args.width_scale)
     scale_horizontal_metrics(font, args.width_scale, args.no_scale_outlines)
+    validate_and_fix_contour_winding(font)
     adjust_vertical_metrics(font, args.height_scale)
     configure_gasp_table(font)
 
