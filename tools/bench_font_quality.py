@@ -145,15 +145,10 @@ def main():
     print("RUNNING FONT QUALITY AND TRUE-TYPE HINTING BENCHMARK")
     print("=" * 60)
 
-    font_files = [
-        "TypusMono95-Regular.ttf",
-        "TypusMono95-Bold.ttf",
-        "TypusMono95-Light.ttf",
-        "TypusMono90-Regular.ttf",
-        "TypusMono90-Bold.ttf",
-        "TypusMono92-Regular.ttf",
-        "TypusMono92-Bold.ttf",
-    ]
+    font_files = [f for f in sorted(os.listdir(args.font_dir)) if f.endswith(".ttf")]
+    if not font_files:
+        print(f"Error: No TTF files found in {args.font_dir}")
+        sys.exit(1)
 
     results = []
     for fname in font_files:
