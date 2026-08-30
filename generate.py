@@ -1,5 +1,7 @@
 import argparse
 import os
+import shutil
+import subprocess
 import sys
 
 from fontTools.ttLib import TTFont
@@ -232,6 +234,30 @@ def set_weight_class(font, style_name):
             os2.usWeightClass = 400  # Regular
 
 
+def autohint_font(input_path, output_path):
+    print("Generating optimized TrueType autohinting via ttfautohint...")
+    cmd = [
+        "ttfautohint",
+        "--composites",
+        "--windows-compatibility",
+        "--default-script=latn",
+        "--fallback-script=latn",
+        "--hinting-range-min=8",
+        "--hinting-range-max=50",
+        "--stem-width-mode=qsq",
+        input_path,
+        output_path,
+    ]
+    try:
+        subprocess.check_call(cmd)
+    except FileNotFoundError:
+        print("Warning: ttfautohint not found in PATH, skipping autohinting.")
+        if input_path != output_path:
+            import shutil
+
+            shutil.copy2(input_path, output_path)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Create a custom condensed, ligature-free font."
@@ -280,6 +306,11 @@ def main():
         action="store_true",
         help="Do not strip stale TrueType hinting bytecode (not recommended when scaling)",
     )
+    parser.add_argument(
+        "--no-autohint",
+        action="store_true",
+        help="Do not run ttfautohint to regenerate hinting bytecode",
+    )
     args = parser.parse_args()
 
     if not os.path.exists(args.input):
@@ -311,8 +342,22 @@ def main():
         strip_ligatures(font)
 
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
-    print(f"Saving modified font to: {args.output}")
-    font.save(args.output)
+
+    if not args.no_autohint and not args.no_strip_bytecode:
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(suffix=".ttf", delete=False) as tmp_f:
+            tmp_path = tmp_f.name
+        try:
+            font.save(tmp_path)
+            autohint_font(tmp_path, args.output)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+    else:
+        print(f"Saving modified font to: {args.output}")
+        font.save(args.output)
+
     print("Generation complete!")
 
 
